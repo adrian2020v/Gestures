@@ -7,10 +7,10 @@ import matplotlib.pyplot as plt
 
 @st.cache_resource
 def load_model():
-    return tf.keras.models.load_model("best_gesture_modelv2.keras")
+    return tf.keras.models.load_model("best_gesture_modelv3.keras")
 
 
-gesture_labels = {0: "Call", 1: "Dislike", 2: "Like", 3: "Peace", 4: "Rock", 5: "Stop"}
+gesture_labels = {0: "Call", 1: "Dislike", 2: "Fist", 3: "Like", 4: "Mute", 5: "Ok", 6: "One", 7: "Peace", 8: "Rock", 9: "Stop"}
 
 model = load_model()
 
