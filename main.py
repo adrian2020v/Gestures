@@ -1,9 +1,9 @@
-#front
 import streamlit as st
 import tensorflow as tf
 from tensorflow.keras.preprocessing import image
 import numpy as np
 import matplotlib.pyplot as plt
+
 
 @st.cache_resource
 def load_model():
@@ -14,6 +14,7 @@ gesture_labels = {0: "Call", 1: "Dislike", 2: "Fist", 3: "Like", 4: "Mute", 5: "
 
 model = load_model()
 
+
 def plot_predictions(predictions):
     plt.figure(figsize=(8, 5))
     plt.bar(gesture_labels.values(), predictions[0], color='skyblue')
@@ -21,6 +22,7 @@ def plot_predictions(predictions):
     plt.ylabel("Prawdopodobieństwo")
     plt.title("Prawdopodobieństwa dla poszczególnych gestów")
     st.pyplot(plt)
+
 
 def predict_gesture(img, use_augmentation=False):
     if img.mode != "RGB":
@@ -44,18 +46,58 @@ def predict_gesture(img, use_augmentation=False):
     confidence = np.max(predictions)
     return gesture_labels.get(predicted_class, "Nie rozpoznano gestu"), confidence, predictions
 
-st.title("Rozpoznawanie gestów")
-st.write("Wgraj zdjęcie z gestem")
+
+st.markdown("""
+    <style>
+    .stApp {
+        background-color: #b3d9ff;
+    }
+    .main-title {
+        color: #003366;
+        font-size: 2.8em;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 10px;
+        text-shadow: 1px 1px 3px #99ccff;
+    }
+    .subtitle {
+        color: #003366;
+        font-size: 1.3em;
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    .stButton > button:hover {
+        background-color: #004d99;
+    }
+    .stFileUploader label {
+        color: #003366;
+        font-weight: bold;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+
+st.markdown("<div class='main-title'>🖐 Rozpoznawanie gestów</div>", unsafe_allow_html=True)
+st.markdown("<div class='subtitle'>✨ Wgraj zdjęcie z gestem i poznaj wynik predykcji ✨</div>", unsafe_allow_html=True)
 
 uploaded_file = st.file_uploader("Wybierz zdjęcie", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
     img = image.load_img(uploaded_file)
-    st.image(img, caption="Wgrany obraz", use_container_width=True)
 
-    use_augmentation = st.checkbox("Użyj augmentacji obrazu dla lepszej pewności", value=False)
+    st.markdown("<div class='uploaded-image'>", unsafe_allow_html=True)
+    st.image(img, caption="Wgrany obraz", use_container_width=True)
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    use_augmentation = st.checkbox("🔄 Użyj augmentacji obrazu dla lepszej pewności", value=False)
 
     result, confidence, predictions = predict_gesture(img, use_augmentation)
-    st.write(f"Rozpoznano gest: {result} (pewność: {confidence:.2f})")
+
+    if confidence > 0.8:
+        st.success(f"🎉 Rozpoznano gest: **{result}** z wysoką pewnością ({confidence:.2f})!")
+    elif confidence > 0.5:
+        st.warning(f"⚠️ Rozpoznano gest: **{result}** średnia pewność: ({confidence:.2f})")
+    else:
+        st.error(f"❌ Nie udało się rozpoznać gestu z wystarczającą pewnością, przypuszczalny gest to: (**{result}** ; {confidence:.2f})")
 
     plot_predictions(predictions)
